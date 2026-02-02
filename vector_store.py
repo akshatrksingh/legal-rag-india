@@ -163,7 +163,7 @@ class VectorStore:
         
         return all_results
     
-    def save(self, output_dir: str = "../data/processed"):
+    def save(self, output_dir: str = "data/processed"):
         """
         Save index and metadata to disk
         
@@ -190,7 +190,7 @@ class VectorStore:
             json.dump(self.metadata, f, ensure_ascii=False, indent=2)
         print(f"Saved metadata to {metadata_file}")
     
-    def load(self, input_dir: str = "../data/processed"):
+    def load(self, input_dir: str = "data/processed"):
         """
         Load index and metadata from disk
         
@@ -257,9 +257,9 @@ def main():
     
     # Load embeddings
     print("\n[1/4] Loading embeddings...")
-    embeddings_file = "../data/processed/embeddings.npy"
-    doc_ids_file = "../data/processed/doc_ids.pkl"
-    metadata_file = "../data/processed/metadata.json"
+    embeddings_file = "data/processed/embeddings.npy"
+    doc_ids_file = "data/processed/doc_ids.pkl"
+    metadata_file = "data/processed/metadata.json"
     
     embeddings = np.load(embeddings_file)
     with open(doc_ids_file, "rb") as f:

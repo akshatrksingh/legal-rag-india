@@ -19,7 +19,7 @@ class RAGService:
     
     def __init__(
         self,
-        vector_store_path: str = "../data/processed",
+        vector_store_path: str = "data/processed",
         embedding_model: str = "BAAI/bge-large-en-v1.5",
         llm_model: str = "llama-3.3-70b-versatile",
         similarity_threshold: float = 0.45
@@ -105,7 +105,7 @@ class RAGService:
             from pathlib import Path
             import json
             
-            doc_path = Path(f'../data/raw/{doc_id}.json')
+            doc_path = Path(f'data/raw/{doc_id}.json')
             judgment_text = ""
             
             if doc_path.exists():
