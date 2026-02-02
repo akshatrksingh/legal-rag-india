@@ -1,9 +1,13 @@
 """
 LegalRAG India Backend - Main Application Entry Point
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional, List, Dict
 import uvicorn
+
+from rag_service import RAGService
 
 app = FastAPI(
     title="LegalRAG India API",
@@ -20,6 +24,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Request/Response Models
+class SearchRequest(BaseModel):
+    query: str
+    top_k: int = 5
+
+class AskRequest(BaseModel):
+    query: str
+    top_k: int = 3
+
+# Initialize RAG service (lazy loading)
+rag_service: Optional[RAGService] = None
+
+def get_rag_service() -> RAGService:
+    """Lazy load RAG service"""
+    global rag_service
+    if rag_service is None:
+        print("Initializing RAG service...")
+        rag_service = RAGService()
+    return rag_service
+
 @app.get("/")
 async def root():
     """Health check endpoint"""
@@ -32,14 +56,60 @@ async def root():
 @app.get("/health")
 async def health():
     """Detailed health check"""
-    return {
-        "status": "healthy",
-        "components": {
-            "api": "operational",
-            "llm": "not_configured",
-            "vector_db": "not_configured"
+    try:
+        rag = get_rag_service()
+        vector_stats = rag.vector_store.get_stats()
+        
+        return {
+            "status": "healthy",
+            "components": {
+                "api": "operational",
+                "llm": "operational",
+                "vector_db": "operational",
+                "total_documents": vector_stats.get("total_documents", 0)
+            }
         }
-    }
+    except Exception as e:
+        return {
+            "status": "degraded",
+            "components": {
+                "api": "operational",
+                "llm": "error",
+                "vector_db": "error"
+            },
+            "error": str(e)
+        }
+
+@app.post("/search")
+async def search(request: SearchRequest):
+    """
+    Semantic search over legal documents
+    Returns top-k most relevant cases without LLM generation
+    """
+    try:
+        rag = get_rag_service()
+        results = rag.retrieve_documents(request.query, top_k=request.top_k)
+        
+        return {
+            "query": request.query,
+            "results": results,
+            "count": len(results)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/ask")
+async def ask(request: AskRequest):
+    """
+    Ask a legal question - uses RAG to generate answer with citations
+    """
+    try:
+        rag = get_rag_service()
+        response = rag.ask(request.query, top_k=request.top_k)
+        
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(

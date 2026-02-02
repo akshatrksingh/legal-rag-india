@@ -1,0 +1,7 @@
+data/kaggle_raw/
+*.pdf
+*.zip
+.git/
+__pycache__/
+*.pyc
+.DS_Store
