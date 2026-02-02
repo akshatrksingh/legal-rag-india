@@ -1,0 +1,7 @@
+{
+  "source": "Kaggle Supreme Court Judgments",
+  "total_in_csv": 2000,
+  "successfully_converted": 1994,
+  "failed": 6,
+  "output_directory": "../data/raw"
+}

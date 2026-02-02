@@ -1,0 +1,6 @@
+{
+  "source": "mock_data_generator",
+  "total_documents": 100,
+  "timestamp": "2026-01-28 21:27:00",
+  "note": "This is synthetic data for development/testing"
+}
